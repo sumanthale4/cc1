@@ -48,7 +48,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
   const getStatusBadge = (status: Notification['status']) => {
     switch (status) {
       case 'delivered':
-        return <Badge variant="success" className="bg-green-100 text-green-700">Delivered</Badge>;
+        return <Badge variant="success\" className="bg-green-100 text-green-700">Delivered</Badge>;
       case 'awaiting':
         return <Badge variant="warning" className="bg-[#FFCB05]/10 text-[#333333]">Awaiting Response</Badge>;
       case 'escalated':
