@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Users, Bell } from 'lucide-react';
 import EscalatedTransactions from '../components/HumanReview/EscalatedTransactions';
 import NotificationPanel from '../components/HumanReview/NotificationPanel';
 import TransactionModal from '../components/Transactions/TransactionModal';
@@ -39,12 +39,10 @@ const HumanReviewPage: React.FC = () => {
   };
 
   const handleEscalate = (id: string) => {
-    // Already escalated, so no change needed
     setIsModalOpen(false);
   };
 
   const handleRetriggerNotification = (notificationId: string) => {
-    // Simulate re-triggering notification
     setNotifications(
       notifications.map(n => 
         n.id === notificationId 
@@ -55,36 +53,41 @@ const HumanReviewPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Action */}
-      <div className="flex justify-between items-center mb-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate('/transactions')}
-          icon={<ArrowLeft className="w-4 h-4" />}
-        >
-          Back to Transactions
-        </Button>
-        
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => {
-            // Simulate refreshing data
-            setTransactions([...transactions]);
-            setNotifications([...notifications]);
-          }}
-          icon={<RefreshCw className="w-4 h-4" />}
-        >
-          Refresh Data
-        </Button>
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-[#333333] mb-2">Human Review Panel</h2>
+          <p className="text-[#A6A6A6]">Review escalated transactions and manage customer notifications</p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/transactions')}
+            icon={<ArrowLeft className="w-4 h-4" />}
+            className="border-[#A6A6A6] text-[#333333] hover:bg-[#F5F5F5]"
+          >
+            Back to Transactions
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setTransactions([...transactions]);
+              setNotifications([...notifications]);
+            }}
+            icon={<RefreshCw className="w-4 h-4" />}
+            className="bg-[#F5F5F5] text-[#333333] hover:bg-[#E5E5E5]"
+          >
+            Refresh Data
+          </Button>
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">Human Review Panel</h2>
+          <div className="flex items-center space-x-2 mb-4">
+            <Users className="w-5 h-5 text-[#FFCB05]" />
+            <h3 className="text-lg font-medium text-[#333333]">Escalated Transactions</h3>
+          </div>
           <EscalatedTransactions
             transactions={transactions}
             onReview={handleReviewTransaction}
@@ -92,7 +95,10 @@ const HumanReviewPage: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">Notification History</h2>
+          <div className="flex items-center space-x-2 mb-4">
+            <Bell className="w-5 h-5 text-[#0057B8]" />
+            <h3 className="text-lg font-medium text-[#333333]">Notification History</h3>
+          </div>
           <NotificationPanel
             notifications={notifications}
             onRetrigger={handleRetriggerNotification}
@@ -100,7 +106,6 @@ const HumanReviewPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Transaction Modal */}
       <TransactionModal
         transaction={selectedTransaction}
         isOpen={isModalOpen}
