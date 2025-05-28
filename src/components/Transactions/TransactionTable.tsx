@@ -51,22 +51,20 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       case 'approved':
         return <Badge variant="success">Approved</Badge>;
       case 'disputed':
-        return <Badge variant="warning">Disputed</Badge>;
+        return <Badge variant="warning" className="bg-[#0057B8]/10 text-[#0057B8]">Disputed</Badge>;
       case 'escalated':
         return <Badge variant="danger">Escalated</Badge>;
       default:
-        return <Badge variant="default">Pending</Badge>;
+        return <Badge variant="default" className="bg-[#F5F5F5] text-[#333333]">Pending</Badge>;
     }
   };
 
-  // Filter transactions based on search term
   const filteredTransactions = transactions.filter(transaction => 
     transaction.merchant.toLowerCase().includes(searchTerm.toLowerCase()) ||
     transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     formatCurrency(transaction.amount).includes(searchTerm)
   );
 
-  // Sort transactions
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
     if (sortField === 'date') {
       return sortDirection === 'asc' 
@@ -89,16 +87,16 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   };
 
   return (
-    <Card className="mb-6">
-      <div className="mb-4">
+    <Card className="bg-white overflow-hidden">
+      <div className="p-4 border-b border-[#F5F5F5]">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-[#A6A6A6]" />
           </div>
           <input
             type="text"
             placeholder="Search transactions..."
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-[#F5F5F5] rounded-lg text-[#333333] placeholder-[#A6A6A6] focus:outline-none focus:ring-2 focus:ring-[#FFCB05] focus:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -106,83 +104,86 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-[#F5F5F5]">
+          <thead className="bg-[#F5F5F5]">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left">
                 <button 
-                  className="flex items-center focus:outline-none"
+                  className="flex items-center text-sm font-medium text-[#333333] hover:text-[#FFCB05] transition-colors"
                   onClick={() => handleSort('date')}
                 >
                   Date
                   <SortIcon field="date" />
                 </button>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left">
                 <button 
-                  className="flex items-center focus:outline-none"
+                  className="flex items-center text-sm font-medium text-[#333333] hover:text-[#FFCB05] transition-colors"
                   onClick={() => handleSort('merchant')}
                 >
                   Merchant
                   <SortIcon field="merchant" />
                 </button>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left">
                 <button 
-                  className="flex items-center focus:outline-none"
+                  className="flex items-center text-sm font-medium text-[#333333] hover:text-[#FFCB05] transition-colors"
                   onClick={() => handleSort('amount')}
                 >
                   Amount
                   <SortIcon field="amount" />
                 </button>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-sm font-medium text-[#333333]">
                 Description
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-sm font-medium text-[#333333]">
                 Status
               </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-right text-sm font-medium text-[#333333]">
                 Action
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-[#F5F5F5]">
             {sortedTransactions.length > 0 ? (
               sortedTransactions.map((transaction) => (
                 <tr 
                   key={transaction.id} 
-                  className={`hover:bg-gray-50 transition-colors ${transaction.flagged ? 'bg-red-50' : ''}`}
+                  className={`hover:bg-[#F5F5F5] transition-colors ${
+                    transaction.flagged ? 'bg-[#FFCB05]/5' : ''
+                  }`}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#333333]">
                     {formatDate(transaction.date)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-[#333333]">
                         {transaction.merchant}
                       </span>
                       {transaction.flagged && (
-                        <span className="ml-2 text-red-600">
+                        <span className="ml-2 text-[#FFCB05]">
                           <Flag className="h-4 w-4" />
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#333333]">
                     {formatCurrency(transaction.amount)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#A6A6A6] max-w-xs truncate">
                     {transaction.description}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(transaction.status)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onViewTransaction(transaction)}
+                      className="border-[#F5F5F5] text-[#333333] hover:bg-[#F5F5F5] hover:border-[#A6A6A6]"
                     >
                       View Details
                     </Button>
@@ -191,11 +192,11 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                  <div className="flex flex-col items-center py-6">
-                    <Search className="h-12 w-12 text-gray-400 mb-2" />
-                    <p className="text-gray-600 font-medium">No transactions found</p>
-                    <p className="text-gray-500 mt-1">Try adjusting your search</p>
+                <td colSpan={6} className="px-6 py-8 text-center">
+                  <div className="flex flex-col items-center">
+                    <Search className="h-12 w-12 text-[#A6A6A6] mb-2" />
+                    <p className="text-[#333333] font-medium">No transactions found</p>
+                    <p className="text-[#A6A6A6] mt-1">Try adjusting your search</p>
                   </div>
                 </td>
               </tr>
