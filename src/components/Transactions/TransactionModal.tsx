@@ -1,58 +1,75 @@
-import React from 'react';
-import { AlertTriangle, CheckCircle, AlertCircle, ArrowUpRight } from 'lucide-react';
-import { Transaction } from '../../types';
-import Modal from '../UI/Modal';
-import Button from '../UI/Button';
-import Badge from '../UI/Badge';
+import React from "react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  AlertCircle,
+  DollarSign,
+  Calendar,
+  Store,
+  FileText,
+  Shield,
+  TrendingUp,
+  X,
+} from "lucide-react";
+import { Transaction } from "../../types";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
+import { useApp } from "../../context/AppContext";
 
 interface TransactionModalProps {
-  transaction: Transaction | null;
+  transaction: Transaction;
   isOpen: boolean;
   onClose: () => void;
-  onApprove: (id: string) => void;
-  onDispute: (id: string) => void;
-  onEscalate: (id: string) => void;
 }
 
 const TransactionModal: React.FC<TransactionModalProps> = ({
   transaction,
   isOpen,
   onClose,
-  onApprove,
-  onDispute,
-  onEscalate
 }) => {
-  if (!transaction) return null;
+  const { updateTransactionStatus, setToastMessage } = useApp();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "full",
     }).format(date);
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
-  const getConfidenceBadge = (score?: number) => {
-    if (!score) return null;
+  const handleApprove = () => {
+    updateTransactionStatus(transaction.id, "approved");
+    setToastMessage({
+      message: "Transaction approved successfully",
+      type: "success",
+    });
+    onClose();
+  };
 
-    let variant = 'default';
-    if (score >= 0.8) variant = 'danger';
-    else if (score >= 0.6) variant = 'warning';
-    else variant = 'info';
+  const handleDispute = () => {
+    updateTransactionStatus(transaction.id, "disputed");
+    setToastMessage({
+      message: "Transaction disputed successfully",
+      type: "info",
+    });
+    onClose();
+  };
 
-    return (
-      <Badge variant={variant}>
-        {`${Math.round(score * 100)}% Confidence`}
-      </Badge>
-    );
+  const getStatusColor = () => {
+    switch (transaction.status) {
+      case "approved":
+        return "bg-emerald-100 text-emerald-700";
+      case "disputed":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-amber-100 text-amber-700";
+    }
   };
 
   return (
@@ -61,122 +78,114 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
       onClose={onClose}
       title="Transaction Details"
       size="lg"
-      footer={
-        <div className="flex justify-between">
-          <div>
-            {transaction.status !== 'approved' && (
-              <Button
-                variant="success"
-                onClick={() => onApprove(transaction.id)}
-                icon={<CheckCircle className="w-4 h-4" />}
-                className="mr-3"
-              >
-                Approve
-              </Button>
-            )}
-          </div>
-          
-          <div>
-            {transaction.status !== 'disputed' && transaction.status !== 'escalated' && (
-              <Button
-                variant="warning"
-                onClick={() => onDispute(transaction.id)}
-                icon={<AlertTriangle className="w-4 h-4" />}
-                className="mr-3"
-              >
-                Dispute
-              </Button>
-            )}
-            
-            {transaction.status !== 'escalated' && (
-              <Button
-                variant="danger"
-                onClick={() => onEscalate(transaction.id)}
-                icon={<ArrowUpRight className="w-4 h-4" />}
-              >
-                Escalate
-              </Button>
-            )}
-          </div>
-        </div>
-      }
     >
-      <div className="space-y-6">
-        {/* Transaction Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900">
-              {transaction.merchant}
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              {formatDate(transaction.date)}
-            </p>
-          </div>
-          <div className="text-xl font-bold text-gray-900">
-            {formatCurrency(transaction.amount)}
-          </div>
-        </div>
+      <div className="space-y-8">
+        {/* Transaction Status Banner */}
+       
 
-        {/* Transaction Details */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h4 className="text-sm font-medium text-gray-500">Description</h4>
-              <p className="mt-1 text-sm text-gray-900">{transaction.description}</p>
+        {/* Transaction Details Grid */}
+        <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          {/* Amount */}
+          <div>
+            <div className="flex items-center text-gray-500 mb-1">
+              <DollarSign className="h-4 w-4 mr-1" />
+              <span>Amount</span>
             </div>
-            <div>
-              <h4 className="text-sm font-medium text-gray-500">Status</h4>
-              <div className="mt-1">
-                {transaction.status === 'approved' && (
-                  <Badge variant="success">Approved</Badge>
-                )}
-                {transaction.status === 'disputed' && (
-                  <Badge variant="warning">Disputed</Badge>
-                )}
-                {transaction.status === 'escalated' && (
-                  <Badge variant="danger">Escalated</Badge>
-                )}
-                {transaction.status === 'pending' && (
-                  <Badge variant="default">Pending Review</Badge>
-                )}
-              </div>
+            <div className="text-base font-semibold text-gray-900">
+              {formatCurrency(transaction.amount)}
+            </div>
+          </div>
+
+          {/* Date */}
+          <div>
+            <div className="flex items-center text-gray-500 mb-1">
+              <Calendar className="h-4 w-4 mr-1" />
+              <span>Date</span>
+            </div>
+            <div className="text-base text-gray-900">
+              {formatDate(transaction.date)}
+            </div>
+          </div>
+
+          {/* Merchant */}
+          <div>
+            <div className="flex items-center text-gray-500 mb-1">
+              <Store className="h-4 w-4 mr-1" />
+              <span>Merchant</span>
+            </div>
+            <div className="text-base text-gray-900">
+              {transaction.merchant}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <div className="flex items-center text-gray-500 mb-1">
+              <FileText className="h-4 w-4 mr-1" />
+              <span>Description</span>
+            </div>
+            <div className="text-base text-gray-900">
+              {transaction.description}
             </div>
           </div>
         </div>
 
         {/* AI Analysis Section */}
         {transaction.flagged && (
-          <div className="border border-red-200 bg-red-50 rounded-lg p-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <AlertCircle className="h-5 w-5 text-red-600" />
+          <div className="border-t border-gray-100 pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              AI Analysis
+            </h3>
+
+            {/* Confidence Score */}
+            <div className="bg-gray-50 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center text-gray-700">
+                  <TrendingUp className="h-4 w-4 mr-1.5" />
+                  <span className="font-medium">AI Confidence Score</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">
+                  {Math.round((transaction.confidenceScore || 0.5) * 100)}%
+                </span>
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  This transaction was flagged by AI
-                </h3>
-                
-                {transaction.flagReason && (
-                  <div className="mt-2">
-                    <h4 className="text-sm font-medium text-red-800">Reason:</h4>
-                    <p className="text-sm text-red-700">
-                      {transaction.flagReason}
-                    </p>
-                  </div>
-                )}
-                
-                {transaction.confidenceScore && (
-                  <div className="mt-2 flex items-center">
-                    <span className="text-sm text-red-800 mr-2">AI Confidence:</span>
-                    {getConfidenceBadge(transaction.confidenceScore)}
-                  </div>
-                )}
-                
-                <div className="mt-3">
-                  <h4 className="text-sm font-medium text-red-800">Expected Pattern:</h4>
-                  <p className="text-sm text-red-700">
-                    Based on your previous spending patterns, this transaction appears unusual.
-                    You typically make purchases of this size less frequently or from established merchants.
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-red-500 h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${(transaction.confidenceScore || 0.5) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* AI Reasoning */}
+            <div className="bg-red-50 rounded-xl p-4 mb-4">
+              <div className="flex items-start">
+                <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                <div className="ml-3">
+                  <h4 className="text-sm font-medium text-red-800">
+                    Reason for Flagging
+                  </h4>
+                  <p className="mt-1 text-sm text-red-700">
+                    {transaction.aiReason ||
+                      "Unusual transaction pattern detected"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Explanation */}
+            <div className="bg-blue-50 rounded-xl p-4">
+              <div className="flex items-start">
+                <Shield className="h-5 w-5 text-blue-500 mt-0.5" />
+                <div className="ml-3">
+                  <h4 className="text-sm font-medium text-blue-800">
+                    AI Analysis Details
+                  </h4>
+                  <p className="mt-1 text-sm text-blue-700">
+                    This transaction appears unusual compared to your typical
+                    spending patterns. Our AI system detected an anomaly based
+                    on the merchant, amount, and timing of this transaction.
                   </p>
                 </div>
               </div>
@@ -184,16 +193,53 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
         )}
 
-        {/* Additional Information */}
-        <div>
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Additional Information</h3>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="text-sm text-gray-600">
-              <p>Transaction ID: {transaction.id}</p>
-              <p className="mt-1">Processed on: {formatDate(transaction.date)} at 14:30 EST</p>
-              <p className="mt-1">Payment Method: Credit Card ending in ****4242</p>
+        {/* Current Status */}
+        <div className="border-t border-gray-100 pt-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Current Status
+            </h3>
+            <div className={`px-4 py-1.5 rounded-full ${getStatusColor()}`}>
+              <div className="flex items-center">
+                {transaction.status === "approved" ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-1.5" />
+                    <span className="font-medium">Approved</span>
+                  </>
+                ) : transaction.status === "disputed" ? (
+                  <>
+                    <AlertTriangle className="h-4 w-4 mr-1.5" />
+                    <span className="font-medium">Disputed</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="h-4 w-4 mr-1.5" />
+                    <span className="font-medium">Pending Review</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-3 border-t border-gray-100 pt-6">
+          <Button variant="outline" onClick={onClose}>
+            <X className="h-4 w-4 mr-1.5" />
+            Close
+          </Button>
+          {transaction.status === "pending" && (
+            <>
+              <Button variant="success" onClick={handleApprove}>
+                <CheckCircle className="h-4 w-4 mr-1.5" />
+                Approve
+              </Button>
+              <Button variant="danger" onClick={handleDispute}>
+                <AlertTriangle className="h-4 w-4 mr-1.5" />
+                Dispute
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Modal>
